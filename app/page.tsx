@@ -96,14 +96,51 @@ export default function Home() {
     if (!selectedFile) return;
 
     setIsSubmitting(true);
+    setError(null);
+
     try {
-      // TODO: Implement actual analysis logic
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate processing
-      alert(
-        "Analysis complete! (This is a demo - actual API integration coming soon)"
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+      formData.append(
+        "prompt",
+        "Analyze this screenshot for UX/usability issues, visual design feedback, and general best practices."
       );
-    } catch {
-      setError("Analysis failed. Please try again.");
+
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Analysis failed");
+      }
+
+      const result = await response.json();
+
+      // Display results in a user-friendly format
+      const resultsText = [
+        "🎯 UX Insights:",
+        ...(result.uxInsights || []).map((insight: string) => `• ${insight}`),
+        "",
+        "🎨 Visual Design:",
+        ...(result.visualDesign || []).map((insight: string) => `• ${insight}`),
+        "",
+        "✅ Best Practices:",
+        ...(result.bestPractices || []).map(
+          (insight: string) => `• ${insight}`
+        ),
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      alert(`Analysis Complete!\n\n${resultsText}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Analysis failed. Please try again.";
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +162,7 @@ export default function Home() {
             Screenshot Analysis Tool
           </h1>
           <p className="mt-6 text-lg text-gray-600 dark:text-gray-300">
-            Upload a screenshot for AI-powered analysis - MVP Demo
+            Upload a screenshot for AI-powered UX/UI analysis
           </p>
         </div>
 
@@ -302,9 +339,7 @@ export default function Home() {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>
-            MVP Demo - No login required • No history saved • Client-side only
-          </p>
+          <p>No login required • No history saved • Powered by OpenRouter AI</p>
         </div>
       </main>
     </div>
