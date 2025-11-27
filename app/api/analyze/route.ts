@@ -40,18 +40,11 @@ function validateFile(file: File): string | null {
   return null;
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Extract base64 data without the data:image/type;base64, prefix
-      const base64Data = result.split(",")[1];
-      resolve(base64Data);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+async function fileToBase64(file: File): Promise<string> {
+  // Use Node.js buffer conversion instead of browser FileReader
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  return buffer.toString("base64");
 }
 
 function parseOpenRouterResponse(text: string): AnalysisResponse {
