@@ -209,6 +209,7 @@ This project is open source and available under the MIT License.
 ## Support
 
 For issues with:
+
 - **This application:** Check the repository issues and documentation
 - **OpenRouter:** Visit [OpenRouter Docs](https://openrouter.ai/docs) or contact their support
 - **Next.js:** See [Next.js GitHub](https://github.com/vercel/next.js)
