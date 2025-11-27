@@ -3,12 +3,28 @@
 import { useState, useRef, ChangeEvent, DragEvent } from "react";
 import Image from "next/image";
 
+interface AnalysisResult {
+  uxInsights: string[];
+  visualDesign: string[];
+  bestPractices: string[];
+  annotations?: Array<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    text: string;
+  }>;
+}
+
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -87,9 +103,21 @@ export default function Home() {
     setSelectedFile(null);
     setPreviewUrl(null);
     setError(null);
+    setAnalysisResults(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleClearResults = () => {
+    setAnalysisResults(null);
+    setError(null);
+  };
+
+  const handleRerunAnalysis = async () => {
+    if (!selectedFile) return;
+    setAnalysisResults(null);
+    await handleSubmit();
   };
 
   const handleSubmit = async () => {
@@ -117,24 +145,7 @@ export default function Home() {
       }
 
       const result = await response.json();
-
-      // Display results in a user-friendly format
-      const resultsText = [
-        "🎯 UX Insights:",
-        ...(result.uxInsights || []).map((insight: string) => `• ${insight}`),
-        "",
-        "🎨 Visual Design:",
-        ...(result.visualDesign || []).map((insight: string) => `• ${insight}`),
-        "",
-        "✅ Best Practices:",
-        ...(result.bestPractices || []).map(
-          (insight: string) => `• ${insight}`
-        ),
-      ]
-        .filter(Boolean)
-        .join("\n");
-
-      alert(`Analysis Complete!\n\n${resultsText}`);
+      setAnalysisResults(result);
     } catch (error) {
       const errorMessage =
         error instanceof Error
@@ -293,7 +304,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-4">
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting}
@@ -327,7 +338,115 @@ export default function Home() {
                     "Analyze Screenshot"
                   )}
                 </button>
+                {analysisResults && !isSubmitting && (
+                  <button
+                    onClick={handleRerunAnalysis}
+                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                  >
+                    Rerun Analysis
+                  </button>
+                )}
               </div>
+
+              {analysisResults && !isSubmitting && (
+                <div className="space-y-6 mt-8">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Analysis Results
+                    </h2>
+                    <button
+                      onClick={handleClearResults}
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium"
+                    >
+                      Clear
+                    </button>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4 flex items-center gap-2">
+                        <span>🎯</span> UX Insights
+                      </h3>
+                      {analysisResults.uxInsights &&
+                      analysisResults.uxInsights.length > 0 ? (
+                        <ol className="space-y-3">
+                          {analysisResults.uxInsights.map((insight, index) => (
+                            <li
+                              key={index}
+                              className="text-sm text-blue-800 dark:text-blue-200 flex gap-3"
+                            >
+                              <span className="font-semibold flex-shrink-0">
+                                {index + 1}.
+                              </span>
+                              <span>{insight}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      ) : (
+                        <p className="text-sm text-blue-600 dark:text-blue-300 italic">
+                          No UX insights available for this design.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-4 flex items-center gap-2">
+                        <span>🎨</span> Visual Design
+                      </h3>
+                      {analysisResults.visualDesign &&
+                      analysisResults.visualDesign.length > 0 ? (
+                        <ol className="space-y-3">
+                          {analysisResults.visualDesign.map(
+                            (insight, index) => (
+                              <li
+                                key={index}
+                                className="text-sm text-purple-800 dark:text-purple-200 flex gap-3"
+                              >
+                                <span className="font-semibold flex-shrink-0">
+                                  {index + 1}.
+                                </span>
+                                <span>{insight}</span>
+                              </li>
+                            )
+                          )}
+                        </ol>
+                      ) : (
+                        <p className="text-sm text-purple-600 dark:text-purple-300 italic">
+                          No visual design feedback available.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-4 flex items-center gap-2">
+                        <span>✅</span> Best Practices
+                      </h3>
+                      {analysisResults.bestPractices &&
+                      analysisResults.bestPractices.length > 0 ? (
+                        <ol className="space-y-3">
+                          {analysisResults.bestPractices.map(
+                            (insight, index) => (
+                              <li
+                                key={index}
+                                className="text-sm text-green-800 dark:text-green-200 flex gap-3"
+                              >
+                                <span className="font-semibold flex-shrink-0">
+                                  {index + 1}.
+                                </span>
+                                <span>{insight}</span>
+                              </li>
+                            )
+                          )}
+                        </ol>
+                      ) : (
+                        <p className="text-sm text-green-600 dark:text-green-300 italic">
+                          No best practices feedback available.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
