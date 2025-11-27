@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Chat Application",
-  description: "A client-side AI chat application powered by OpenRouter",
+  title: "Screenshot Analysis Tool",
+  description: "Upload screenshots for AI-powered analysis - MVP Demo",
 };
 
 export default function RootLayout({
