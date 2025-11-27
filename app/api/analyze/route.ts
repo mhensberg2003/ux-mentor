@@ -105,7 +105,7 @@ function parseOpenRouterResponse(text: string): AnalysisResponse {
 export async function POST(request: NextRequest) {
   try {
     // Check API key
-    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       console.error("OpenRouter API key not configured");
       return NextResponse.json(
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
     const base64Image = await fileToBase64(file);
 
     // Get model from environment or use default
-    const model = process.env.NEXT_PUBLIC_OPENROUTER_MODEL || DEFAULT_MODEL;
+    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
 
     // Prepare OpenRouter request
     const openRouterPayload = {

@@ -1,15 +1,15 @@
 # AI Chat Application
 
-A client-side AI chat application powered by [OpenRouter](https://openrouter.ai), built with Next.js 15, TypeScript, and Tailwind CSS.
+A screenshot analysis application powered by [OpenRouter](https://openrouter.ai), built with Next.js 15, TypeScript, and Tailwind CSS.
 
 ## Architecture
 
-This application is **client-only** with no backend persistence. All requests are made directly from the browser to OpenRouter's API using your API key. This means:
+This application uses a **server-side API route** to securely communicate with OpenRouter's API. The API key is stored server-side and never exposed to the client. This means:
 
-- **No server-side dependencies** - The app runs entirely in the browser
-- **No data persistence** - Chat history is not saved between sessions
-- **Privacy-focused** - Your data is handled directly between your browser and OpenRouter
-- **Easy deployment** - Deploy to Vercel or any static hosting provider
+- **Secure API key handling** - Your API key remains private on the server
+- **No data persistence** - Analysis results are not saved between sessions
+- **Privacy-focused** - Your screenshots are processed server-side
+- **Easy deployment** - Deploy to Vercel or any hosting provider that supports Next.js API routes
 
 ## Prerequisites
 
@@ -53,11 +53,11 @@ cp .env.example .env.local
 3. Edit `.env.local` and add your API key:
 
 ```env
-NEXT_PUBLIC_OPENROUTER_API_KEY=your_actual_api_key_here
-NEXT_PUBLIC_OPENROUTER_MODEL=meta-llama/llama-2-70b-chat
+OPENROUTER_API_KEY=your_actual_api_key_here
+OPENROUTER_MODEL=meta-llama/llama-2-70b-chat
 ```
 
-**Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Since this is a client-only app, your API key will be visible in the browser. Only use keys with appropriate rate limits and API quotas.
+**Note:** These environment variables are server-side only and will not be exposed to the browser, keeping your API key secure.
 
 ### Production / Vercel Deployment
 
@@ -68,9 +68,9 @@ NEXT_PUBLIC_OPENROUTER_MODEL=meta-llama/llama-2-70b-chat
    - Select your repository
    - Click "Import"
 3. In the environment variables section, add:
-   - Key: `NEXT_PUBLIC_OPENROUTER_API_KEY`
+   - Key: `OPENROUTER_API_KEY`
    - Value: Your OpenRouter API key
-   - Key: `NEXT_PUBLIC_OPENROUTER_MODEL`
+   - Key: `OPENROUTER_MODEL`
    - Value: Your preferred model (e.g., `meta-llama/llama-2-70b-chat`)
 4. Click "Deploy"
 
@@ -152,10 +152,10 @@ Visit [OpenRouter Models](https://openrouter.ai/docs/models) to see all availabl
 
 ## Important Notes
 
-- **Client-Only Architecture:** All API calls are made directly from the browser. The `NEXT_PUBLIC_` prefix means your API key is visible to end-users.
-- **Rate Limiting:** Consider rate limiting your API key based on expected usage
-- **No Persistence:** Chat history and data are not saved. Refresh the page to start a new session
-- **CORS:** OpenRouter handles CORS, so direct browser requests work without a proxy
+- **Server-Side API:** All API calls to OpenRouter are made server-side via Next.js API routes, keeping your API key secure and never exposed to the browser.
+- **Rate Limiting:** Consider monitoring your OpenRouter API usage based on expected traffic
+- **No Persistence:** Analysis results are not saved. Each screenshot analysis is independent
+- **Security:** Environment variables without the `NEXT_PUBLIC_` prefix are only accessible server-side
 
 ## Troubleshooting
 
